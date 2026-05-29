@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StockBase · Shopify Sync Settings (v3)</title>
+<style>
+  :root {
+    --green: #1f8755;
+    --green-dark: #186a43;
+    --green-light: #e8f5ee;
+    --text: #1a1a1a;
+    --muted: #5e6b73;
+    --border: #d8dde1;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --blue: #2563eb;
+    --danger: #d92d20;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .app { max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px; }
+  .subtitle { color: var(--muted); max-width: 760px; margin: 0 0 28px; }
+  .subtitle a { color: #6c4ed8; font-weight: 500; }
+
+  /* Tabs row */
+  .tabs-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tabs { display: flex; gap: 32px; }
+  .tab {
+    background: none;
+    border: none;
+    padding: 12px 0;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+  .nav-buttons { display: flex; gap: 8px; padding-bottom: 8px; }
+
+  /* Buttons */
+  .btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: #f7f8f9; }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-help {
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+  }
+  .card-row + .card-body { border-top: 1px solid var(--border); padding: 18px 20px; background: #fcfcfd; }
+  .loc-name { font-weight: 600; }
+  .loc-status { color: var(--muted); margin-top: 2px; }
+  .loc-status strong { color: var(--text); font-weight: 600; }
+  .loc-status.connected strong { color: var(--green); }
+
+  /* Radio list */
+  .radio-group { display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .radio-item input { margin-top: 3px; accent-color: var(--blue); }
+  .radio-item .radio-content { flex: 1; }
+  .radio-item .radio-label { font-weight: 500; }
+  .field-label { display:block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  .select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .select:hover { border-color: #b9bfc4; }
+  .select .pin { color: var(--muted); }
+
+  /* Section header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 0 10px;
+    color: var(--muted);
+  }
+  .section-header .icon {
+    width: 20px; height: 20px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--muted);
+  }
+  .section-header h3 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text); }
+  .help-dot {
+    width: 18px; height: 18px;
+    background: #d8dde1;
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    cursor: help;
+  }
+
+  /* Field rows */
+  .form-card { padding: 18px 20px; }
+  .form-row + .form-row { margin-top: 14px; }
+  .form-row label { display:block; font-weight: 500; margin-bottom: 6px; }
+
+  /* Checkboxes */
+  .checklist { display: flex; flex-direction: column; gap: 10px; }
+  .checklist label { display:flex; align-items:center; gap: 10px; cursor: pointer; }
+  .checklist input { accent-color: var(--blue); width: 16px; height: 16px; }
+
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+  /* Shopify-bag icon */
+  .shop-bag {
+    width: 18px; height: 18px;
+    background: linear-gradient(180deg,#7ab55c,#5a8e3f);
+    border-radius: 3px;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .shop-bag::before {
+    content: "";
+    position: absolute;
+    inset: 3px 3px auto 3px;
+    height: 4px;
+    border: 1.5px solid #fff;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+  }
+
+  /* Empty placeholder for Orders tabs */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  /* Setup instructions banner */
+  .setup-banner {
+    display: flex;
+    gap: 12px;
+    background: #eaf3fb;
+    border: 1px solid #cfe2f3;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: #1f3a52;
+  }
+  .setup-banner ol { margin: 6px 0 0 18px; padding: 0; }
+  .setup-banner li { margin: 2px 0; }
+  .setup-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: #2b7cb8; color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-style: italic; font-weight: 700; font-family: Georgia, serif;
+    font-size: 14px;
+  }
+
+  /* Orders / conflicts grouped sections */
+  .group { margin-bottom: 18px; }
+  .group-title { font-weight: 600; margin-bottom: 8px; }
+  .text-input {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    width: 220px;
+    margin-top: 6px;
+    margin-left: 26px;
+  }
+  .radio-stack { display:flex; flex-direction:column; gap:8px; }
+  .radio-stack label { display:flex; align-items:flex-start; gap:8px; cursor:pointer; }
+  .radio-stack input { margin-top:3px; accent-color: var(--blue); }
+  .radio-stack .sub { display:block; color: var(--muted); font-size:13px; margin-left: 0; }
+
+  /* === v2: Sync trust additions === */
+
+  /* Sync status strip */
+  .sync-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    font-size: 13.5px;
+  }
+  .sync-strip .left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sync-strip .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); flex-shrink: 0;
+  }
+  .sync-strip.warn .dot { background: #e8a317; }
+  .sync-strip.idle .dot { background: #b9bfc4; }
+  .sync-strip.syncing .dot {
+    background: var(--blue);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+  .sync-strip .sep { color: #c4c9cd; }
+  .sync-strip .warn-link {
+    color: #b07208; text-decoration: underline; cursor: pointer;
+    background: none; border: none; padding: 0; font: inherit;
+  }
+  .activity-toggle {
+    background: none; border: none; color: var(--blue);
+    cursor: pointer; font: inherit; padding: 4px 6px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .activity-toggle:hover { background: #eef3fb; }
+  .activity-toggle .chev { transition: transform .15s; display: inline-block; }
+  .activity-toggle.open .chev { transform: rotate(180deg); }
+
+  .activity-log {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 0;
+    margin: -8px 0 16px;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+  }
+  .activity-log.open { display: block; }
+  .activity-log .item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px;
+    border-bottom: 1px solid #f0f2f4;
+  }
+  .activity-log .item:last-child { border-bottom: none; }
+  .activity-log .item .ico {
+    width: 16px; height: 16px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+  .activity-log .item .ico.ok { color: var(--green); }
+  .activity-log .item .ico.warn { color: #b07208; }
+  .activity-log .item .ico.skip { color: var(--muted); }
+  .activity-log .item .when { color: var(--muted); margin-left: auto; font-size: 12px; }
+
+  /* Tab badge */
+  .tab-badge {
+    display: inline-block;
+    background: #b07208;
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .tab-badge.zero { display: none; }
+
+  /* Push checkbox hints */
+  .checklist.with-hints { gap: 14px; }
+  .checklist.with-hints label {
+    align-items: flex-start;
+  }
+  .checklist.with-hints label input { margin-top: 3px; }
+  .checklist.with-hints .opt {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .checklist.with-hints .opt .name {
+    font-weight: 500; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .checklist.with-hints .opt .hint {
+    color: var(--muted); font-size: 12.5px;
+  }
+
+  /* Preflight inline panel (push & pull) */
+  .preflight {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: #f9fbfa;
+    padding: 16px 20px;
+  }
+  .preflight.open { display: block; }
+  .preflight .pf-title {
+    font-weight: 600; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .preflight .pf-list {
+    margin: 6px 0 10px 0;
+    padding: 0; list-style: none;
+  }
+  .preflight .pf-list li {
+    padding: 4px 0;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .preflight .pf-list li::before {
+    content: "·"; color: var(--muted); font-weight: 700;
+  }
+  .preflight .pf-safe {
+    color: var(--green); font-size: 13px; margin: 6px 0 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .preflight .pf-actions { display: flex; gap: 8px; }
+
+  .push-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+  }
+  .push-footer .pending {
+    color: var(--muted); font-size: 13px;
+  }
+  .push-footer .pending strong { color: var(--text); }
+
+  /* Conflict cards */
+  .conflict-section { margin-bottom: 22px; }
+  .conflict-section .ch-title {
+    font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;
+  }
+  .conflict-section .ch-sub { color: var(--muted); margin: 0 0 12px; font-size: 13px; }
+  .conflict-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 3px solid #e8a317;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+  .conflict-card .cc-head {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 600; margin-bottom: 4px;
+  }
+  .conflict-card .cc-head .warn-ico {
+    color: #b07208; font-size: 14px;
+  }
+  .conflict-card .cc-meta {
+    color: var(--muted); font-size: 13px; margin-bottom: 12px;
+  }
+  .conflict-card .cc-actions {
+    display: flex; gap: 8px;
+  }
+  .conflict-card .btn-fix {
+    background: var(--green); border-color: var(--green); color: #fff;
+  }
+  .conflict-card .btn-fix:hover {
+    background: var(--green-dark); border-color: var(--green-dark);
+  }
+  .conflict-card.resolved {
+    opacity: .55;
+    border-left-color: var(--green);
+  }
+  .conflict-card .resolved-msg {
+    color: var(--green); font-size: 13px; margin-top: 8px;
+  }
+
+  .empty-conflicts {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty-conflicts .check {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--green-light); color: var(--green);
+    font-size: 16px; font-weight: 700; margin-bottom: 8px;
+  }
+
+  /* === v3: tab framing & previews === */
+
+  /* Job-to-be-done sub-header per tab */
+  .tab-jtbd {
+    color: var(--text);
+    font-weight: 500;
+    margin: 0 0 8px;
+  }
+
+  /* Match-health card (top of Product Sync) */
+  .health-card {
+    display: flex; align-items: center; gap: 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 3px solid #e8a317;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+  }
+  .health-card.ok { border-left-color: var(--green); }
+  .health-card .health-ico {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: 50%;
+    background: #fdf3df; color: #b07208;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .health-card.ok .health-ico { background: var(--green-light); color: var(--green); }
+  .health-card .health-text { flex: 1; }
+  .health-card .health-text .h-line1 { font-weight: 600; }
+  .health-card .health-text .h-line2 { color: var(--muted); font-size: 13px; }
+  .health-card .health-cta {
+    background: var(--green); border: 1px solid var(--green); color: #fff;
+    padding: 8px 14px; border-radius: 6px; cursor: pointer;
+    font: inherit; white-space: nowrap;
+  }
+  .health-card .health-cta:hover { background: var(--green-dark); border-color: var(--green-dark); }
+
+  .match-list {
+    display: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .match-list.open { display: block; }
+  .match-row {
+    display: grid;
+    grid-template-columns: 1fr 32px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f2f4;
+  }
+  .match-row:last-child { border-bottom: none; }
+  .match-row .arrow { text-align: center; color: var(--muted); }
+  .match-row .name { font-weight: 500; }
+  .match-row .sku { color: var(--muted); font-size: 12px; }
+  .match-row .pickr {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; background: #fff; cursor: pointer; font: inherit;
+    color: var(--blue);
+  }
+  .match-row .pickr:hover { background: #eef3fb; }
+  .match-row.matched { opacity: .5; }
+  .match-row.matched .pickr {
+    color: var(--green); cursor: default;
+  }
+
+  /* Locations: pairing diagram */
+  .pair-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .pair-row {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr auto;
+    gap: 12px; align-items: center;
+  }
+  .pair-side { min-width: 0; }
+  .pair-side .pair-name {
+    font-weight: 600; display: flex; align-items: center; gap: 6px;
+  }
+  .pair-side .pair-tag {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    color: var(--muted); margin-left: 4px;
+  }
+  .pair-side .pair-meta {
+    color: var(--muted); font-size: 13px; margin-top: 2px;
+  }
+  .pair-arrow {
+    text-align: center;
+    font-size: 18px;
+    color: var(--muted);
+  }
+  .pair-arrow.connected { color: var(--green); }
+  .pair-side.empty .pair-name { color: var(--muted); font-style: italic; font-weight: 400; }
+  .pair-suggestion {
+    background: #eaf3fb;
+    border: 1px solid #cfe2f3;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #1f3a52;
+    display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  }
+  .pair-suggestion .suggest-actions { display: flex; gap: 6px; }
+  .pair-suggestion .btn {
+    padding: 4px 10px; font-size: 12px;
+  }
+
+  /* Send-with-counts (Product Sync) */
+  .checklist.with-counts label .opt .name {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  }
+  .change-count {
+    font-size: 12px; color: var(--green); font-weight: 600;
+  }
+  .change-count.idle { color: var(--muted); font-weight: 500; }
+  .change-count.would { color: var(--muted); font-weight: 400; font-style: italic; }
+
+  .test-send {
+    background: none; border: none; color: var(--blue); cursor: pointer;
+    font: inherit; font-size: 13px; text-decoration: underline;
+    padding: 0;
+  }
+
+  /* Schedule selector */
+  .schedule-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .schedule-select {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font: inherit; cursor: pointer;
+    background: #fff;
+  }
+
+  /* Orders tab live sample */
+  .sample-card {
+    background: linear-gradient(180deg, #fdfdfd, #fafbfc);
+    border: 1px dashed #c4c9cd;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .sample-card .sample-label {
+    font-size: 12px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .04em; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sample-card .sample-order {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+    font-size: 13px;
+  }
+  .sample-card .sample-order .lbl { color: var(--muted); font-size: 12px; }
+  .sample-card .sample-order .val { font-weight: 500; }
+
+  /* Inline-preview chips on radios */
+  .radio-stack.with-preview label .preview-chip {
+    color: var(--muted); margin-left: 6px; font-style: italic;
+  }
+  .radio-stack.with-preview label.checked .preview-chip {
+    color: var(--green); font-style: normal; font-weight: 500;
+  }
+
+  /* Recent imports strip */
+  .recent-strip {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 18px;
+    box-shadow: var(--shadow);
+  }
+  .recent-strip h4 {
+    margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .recent-strip .r-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; font-size: 13px;
+    border-bottom: 1px solid #f4f5f7;
+  }
+  .recent-strip .r-row:last-child { border-bottom: none; }
+  .recent-strip .r-id { font-weight: 500; }
+  .recent-strip .r-meta { color: var(--muted); margin-left: auto; font-size: 12px; }
+
+  /* Conflict groups */
+  .conflict-group {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .conflict-group .cg-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; cursor: pointer;
+    user-select: none;
+  }
+  .conflict-group .cg-head:hover { background: #fafbfc; }
+  .conflict-group .cg-chev { transition: transform .15s; color: var(--muted); }
+  .conflict-group.open .cg-chev { transform: rotate(90deg); }
+  .conflict-group .cg-title { font-weight: 600; flex: 1; }
+  .conflict-group .cg-count {
+    color: var(--muted); font-size: 13px;
+  }
+  .conflict-group .cg-bulkfix {
+    background: var(--green); border: 1px solid var(--green); color: #fff;
+    padding: 5px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; font: inherit;
+  }
+  .conflict-group .cg-bulkfix:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .conflict-group .cg-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 10px 16px 14px;
+  }
+  .conflict-group.open .cg-body { display: block; }
+
+  /* Conflict cards inside groups: tighter style */
+  .cc-promise {
+    color: var(--muted); font-size: 13px; margin: 4px 0 10px;
+  }
+  .cc-promise strong { color: var(--text); font-weight: 500; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1f2937; color: #fff;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Direction header (replaces Push/Pull jargon) */
+  .dir-header {
+    display: flex; align-items: center; gap: 10px;
+    margin: 24px 0 10px;
+  }
+  .dir-header h3 {
+    font-size: 14px; font-weight: 600; margin: 0; color: var(--text);
+  }
+  .dir-flow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+  }
+  .dir-flow .arrow {
+    color: var(--green); font-weight: 700;
+  }
+  .dir-flow .pill {
+    font-weight: 600; color: var(--text);
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="setup-banner">
+      <span class="setup-icon">i</span>
+      <div>
+        <div style="font-weight:600; margin-bottom:2px">Setup instructions</div>
+        <div>You're just a few minutes away from syncing StockBase with Shopify.</div>
+        <ol>
+          <li>Please start from the <strong>Locations</strong> tab and follow the written instructions.</li>
+          <li>Select <strong>Next</strong> as you complete each tab.</li>
+          <li>When you've finished the final tab, select <strong>Complete</strong> to finish setup.</li>
+        </ol>
+      </div>
+    </div>
+    <h1>Settings <span style="font-size:13px; font-weight:500; color:var(--blue); background:#eef3fb; border-radius:6px; padding:3px 8px; vertical-align:middle">v3 prototype</span></h1>
+    <p class="subtitle">
+      Sync with Shopify by pushing and pulling select data. StockBase can push product details, stock levels, and shipping details and pull newly created products and sales from Shopify.
+      <a href="#">Learn More</a>
+    </p>
+
+    <div class="sync-strip warn" id="syncStrip">
+      <div class="left">
+        <span class="dot"></span>
+        <span id="stripStatus">Last sync <strong>2 min ago</strong></span>
+        <span class="sep">·</span>
+        <span><strong>12</strong> updates sent</span>
+        <span class="sep">·</span>
+        <button class="warn-link" id="conflictJump"><strong>3</strong> conflicts need attention</button>
+      </div>
+      <button class="activity-toggle open" id="activityToggle">
+        View activity <span class="chev">▾</span>
+      </button>
+    </div>
+    <div class="activity-log open" id="activityLog">
+      <div class="item"><span class="ico ok">✓</span><span>Sent 3 price changes to Shopify</span><span class="when">14:02</span></div>
+      <div class="item"><span class="ico ok">✓</span><span>Sent 8 quantity updates to Shopify</span><span class="when">14:02</span></div>
+      <div class="item"><span class="ico ok">✓</span><span>Uploaded 1 image to Shopify (SKU EYE-204)</span><span class="when">14:02</span></div>
+      <div class="item"><span class="ico warn">⚠</span><span>Order #1042 needs your input — pricing scheme "EU VAT" not found</span><span class="when">13:58</span></div>
+      <div class="item"><span class="ico warn">⚠</span><span>Order #1041 needs your input — customer "M. Costa" not found</span><span class="when">13:58</span></div>
+      <div class="item"><span class="ico warn">⚠</span><span>Order #1040 needs your input — taxing scheme missing</span><span class="when">13:58</span></div>
+      <div class="item"><span class="ico ok">✓</span><span>Brought in 4 new products from Shopify</span><span class="when">13:55</span></div>
+      <div class="item"><span class="ico skip">⊘</span><span>Skipped order #1029 (you chose to skip)</span><span class="when">11:14</span></div>
+    </div>
+
+    <div class="tabs-row">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="locations">Locations</button>
+        <button class="tab" data-tab="product">Product Sync</button>
+        <button class="tab" data-tab="orders">Orders</button>
+        <button class="tab" data-tab="conflicts">Order Conflicts <span class="tab-badge" id="conflictBadge">3</span></button>
+      </div>
+      <div class="nav-buttons">
+        <button class="btn" id="backBtn" style="display:none">Back</button>
+        <button class="btn btn-primary" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <!-- Locations -->
+    <section class="panel active" data-panel="locations">
+      <p class="tab-jtbd">Match your stores so stock can stay in sync.</p>
+      <p class="panel-help">Each Shopify location needs a StockBase location to pull stock from. Match them once and StockBase keeps them aligned.</p>
+
+      <!-- Vancouver Store: matched -->
+      <div class="pair-card" id="pair-vancouver">
+        <div class="pair-row">
+          <div class="pair-side">
+            <div class="pair-name">Vancouver Store <span class="pair-tag">on Shopify</span></div>
+            <div class="pair-meta">47 products · 312 units in stock</div>
+          </div>
+          <div class="pair-arrow connected">↔</div>
+          <div class="pair-side">
+            <div class="pair-name">Default Location <span class="pair-tag">in StockBase</span></div>
+            <div class="pair-meta">Source of truth for stock</div>
+          </div>
+          <button class="btn" data-pair-toggle="vancouver">Unmatch</button>
+        </div>
+      </div>
+
+      <!-- Toronto: not matched, with smart suggestion -->
+      <div class="pair-card" id="pair-toronto">
+        <div class="pair-row">
+          <div class="pair-side">
+            <div class="pair-name">Toronto store <span class="pair-tag">on Shopify</span></div>
+            <div class="pair-meta">23 products · 184 units in stock · 5 SKUs only here</div>
+          </div>
+          <div class="pair-arrow">→</div>
+          <div class="pair-side empty">
+            <div class="pair-name">Pick a StockBase location</div>
+            <div class="pair-meta">Not matched yet</div>
+          </div>
+          <button class="btn btn-primary" data-pair-toggle="toronto">Match locations</button>
+        </div>
+        <div class="pair-suggestion" id="suggest-toronto">
+          <span>💡 Suggested match: <strong>Toronto Warehouse</strong> (similar name)</span>
+          <span class="suggest-actions">
+            <button class="btn btn-primary" data-pair-accept="toronto">Use suggestion</button>
+            <button class="btn" data-pair-dismiss="toronto">Pick another</button>
+          </span>
+        </div>
+        <div class="preflight" id="pair-preflight-toronto">
+          <div class="pf-title">If you match these, StockBase will:</div>
+          <ul class="pf-list">
+            <li>match <strong>23 Shopify products</strong> at Toronto store with their StockBase equivalents</li>
+            <li>start keeping stock aligned between <strong>Toronto store</strong> and <strong>Toronto Warehouse</strong></li>
+          </ul>
+          <div class="pf-safe">✓ We'll do a stock check first — nothing will sell out.</div>
+          <div class="pf-actions">
+            <button class="btn" data-pair-cancel="toronto">Cancel</button>
+            <button class="btn btn-primary" data-pair-confirm="toronto">Match these locations</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Sync -->
+    <section class="panel" data-panel="product">
+      <p class="tab-jtbd">Choose what flows between StockBase and Shopify, and how often.</p>
+
+      <!-- Match health card -->
+      <div class="health-card" id="healthCard">
+        <div class="health-ico">⚠</div>
+        <div class="health-text">
+          <div class="h-line1"><strong>32 of 36 products</strong> matched between StockBase and Shopify.</div>
+          <div class="h-line2">4 Shopify products don't have a StockBase match yet — they won't sync until matched.</div>
+        </div>
+        <button class="health-cta" id="reviewMatchesBtn">Review &amp; match →</button>
+      </div>
+
+      <div class="match-list" id="matchList">
+        <div class="match-row" data-sku="EYE-204">
+          <div><div class="name">Aviator Sunglasses — Gold</div><div class="sku">Shopify SKU: EYE-204</div></div>
+          <div class="arrow">→</div>
+          <div><button class="pickr" data-match="EYE-204">Match to StockBase product…</button></div>
+          <div></div>
+        </div>
+        <div class="match-row" data-sku="EYE-188">
+          <div><div class="name">Round Frames — Tortoise</div><div class="sku">Shopify SKU: EYE-188</div></div>
+          <div class="arrow">→</div>
+          <div><button class="pickr" data-match="EYE-188">Match to StockBase product…</button></div>
+          <div></div>
+        </div>
+        <div class="match-row" data-sku="LENS-12">
+          <div><div class="name">Polarized Lens Kit</div><div class="sku">Shopify SKU: LENS-12</div></div>
+          <div class="arrow">→</div>
+          <div><button class="pickr" data-match="LENS-12">Match to StockBase product…</button></div>
+          <div></div>
+        </div>
+        <div class="match-row" data-sku="CASE-7">
+          <div><div class="name">Hard Case — Black</div><div class="sku">Shopify SKU: CASE-7</div></div>
+          <div class="arrow">→</div>
+          <div><button class="pickr" data-match="CASE-7">Match to StockBase product…</button></div>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <span class="icon">$⇄</span>
+        <h3>Pricing settings</h3>
+        <span class="help-dot" title="How Shopify pricing maps to StockBase">?</span>
+      </div>
+      <div class="card form-card">
+        <div class="form-row">
+          <label>Price</label>
+          <div class="select"><span class="shop-bag"></span><span>Normal Price</span></div>
+        </div>
+        <div class="form-row">
+          <label>Compare at price</label>
+          <div class="select"><span class="shop-bag"></span><span style="color:var(--muted)">Select pricing scheme</span></div>
+        </div>
+      </div>
+
+      <div class="dir-header">
+        <h3>Send to Shopify</h3>
+        <span class="dir-flow"><span class="pill">StockBase</span><span class="arrow">→</span><span class="pill">Shopify</span></span>
+      </div>
+      <div class="card" id="pushCard">
+        <div class="form-card">
+          <div style="font-weight:600; margin-bottom:4px">When you change a product in StockBase, send these details to demo-store</div>
+          <div style="color:var(--muted); margin-bottom:14px">Only the fields you check will be sent. Blank fields in StockBase are ignored — Shopify keeps its existing value.</div>
+          <div class="checklist with-hints with-counts">
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Quantity available <span class="change-count">8 products waiting to update</span></span><span class="hint">Keeps Shopify stock matching StockBase when items move.</span></span></label>
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Images <span class="change-count">1 product waiting to update</span></span><span class="hint">Sends product photos added in StockBase to the matching Shopify product.</span></span></label>
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Barcode <span class="change-count idle">no changes pending</span></span><span class="hint">Updates the Shopify variant barcode to match StockBase's.</span></span></label>
+            <label><input type="checkbox" /><span class="opt"><span class="name">Weight <span class="help-dot">?</span> <span class="change-count would">would update 14 products if turned on</span></span><span class="hint">Used by Shopify shipping — only enable if your StockBase weights are accurate.</span></span></label>
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Price <span class="change-count">3 products waiting to update</span></span><span class="hint">Replaces Shopify's price with StockBase's normal price.</span></span></label>
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Compare at price <span class="change-count idle">no changes pending</span></span><span class="hint">Sets Shopify's "compare at" using your selected pricing scheme above.</span></span></label>
+            <label><input type="checkbox" checked /><span class="opt"><span class="name">Cost <span class="change-count idle">no changes pending</span></span><span class="hint">Pushes StockBase's cost-per-item to Shopify (visible to staff only).</span></span></label>
+          </div>
+          <div class="divider"></div>
+          <div style="font-weight:600; margin-bottom:8px">If product isn't found in Shopify</div>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="notfound" checked /><span class="radio-content"><span class="radio-label" style="font-weight:400">Let me know</span></span></label>
+            <label class="radio-item"><input type="radio" name="notfound" /><span class="radio-content"><span class="radio-label" style="font-weight:400">Don't let me know</span></span></label>
+          </div>
+          <div class="push-footer">
+            <span class="pending">
+              <strong id="pendingCount">12</strong> updates waiting to send
+              · <button class="test-send" id="testSendBtn">Send one as a test</button>
+            </span>
+            <button class="btn btn-primary" id="previewPushBtn">Preview before sending →</button>
+          </div>
+          <div class="schedule-row">
+            <span style="color:var(--muted)">Send updates:</span>
+            <select class="schedule-select" id="scheduleSelect">
+              <option value="instant">Right away when things change</option>
+              <option value="hourly">Every hour</option>
+              <option value="manual">Manually only (I'll click send)</option>
+            </select>
+          </div>
+        </div>
+        <div class="preflight" id="pushPreflight">
+          <div class="pf-title">If you send now, Shopify will:</div>
+          <ul class="pf-list">
+            <li>get a new <strong>quantity</strong> for 8 products</li>
+            <li>get a new <strong>price</strong> for 3 products</li>
+            <li>get <strong>1 new image</strong></li>
+          </ul>
+          <div class="pf-safe">✓ Nothing in Shopify will be deleted or unpublished.</div>
+          <div class="pf-actions">
+            <button class="btn" id="cancelPushBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmPushBtn">Send 12 updates to Shopify</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dir-header">
+        <h3>Bring in from Shopify</h3>
+        <span class="dir-flow"><span class="pill">Shopify</span><span class="arrow">→</span><span class="pill">StockBase</span></span>
+      </div>
+      <div class="card" id="pullCard">
+        <div class="card-row">
+          <div>
+            <div class="loc-name">Bring demo-store products into StockBase</div>
+            <div class="loc-status" id="pullStatus">This is <strong>turned off.</strong> Products and stock from Shopify are not coming in.</div>
+          </div>
+          <button class="btn btn-primary" id="pullActivateBtn">Turn on</button>
+        </div>
+        <div class="card-body" data-pull-body>
+          <span style="color:var(--muted)">Brings in product details and stock levels.</span>
+        </div>
+        <div class="preflight" id="pullPreflight">
+          <div class="pf-title">If you turn this on, StockBase will:</div>
+          <ul class="pf-list">
+            <li>add <strong>47 products</strong> from demo-store to your StockBase product list</li>
+            <li>keep stock levels matched going forward</li>
+          </ul>
+          <div class="pf-safe">✓ Nothing in StockBase will be overwritten or deleted.</div>
+          <div class="pf-actions">
+            <button class="btn" id="cancelPullBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmPullBtn">Turn on &amp; bring in 47 products</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orders -->
+    <section class="panel" data-panel="orders">
+      <p class="tab-jtbd">Decide what an imported Shopify order looks like in StockBase.</p>
+
+      <div class="sample-card">
+        <div class="sample-label">📋 Live preview — based on your current settings, a Shopify order will appear in StockBase as:</div>
+        <div class="sample-order">
+          <div><div class="lbl">Order #</div><div class="val" id="sample-order-num">shopify-1043</div></div>
+          <div><div class="lbl">Status</div><div class="val" id="sample-status">Open</div></div>
+          <div><div class="lbl">Customer</div><div class="val" id="sample-customer">Jane Doe</div></div>
+          <div><div class="lbl">Total</div><div class="val">€82.40</div></div>
+        </div>
+      </div>
+
+      <div class="card form-card">
+        <div class="group">
+          <div class="group-title">Customer name on the imported order</div>
+          <div class="radio-stack with-preview" data-group="cust-name">
+            <label><input type="radio" name="cust-name" data-preview="Acme Ltd." /><span>Shopify Company Name <span class="preview-chip">→ "Acme Ltd."</span></span></label>
+            <label class="checked"><input type="radio" name="cust-name" checked data-preview="Jane Doe" /><span>Shopify Customer Name <span class="preview-chip">→ "Jane Doe"</span></span></label>
+            <label><input type="radio" name="cust-name" data-preview="jane@acme.com" /><span>Shopify Customer Email <span class="preview-chip">→ "jane@acme.com"</span></span></label>
+            <label><input type="radio" name="cust-name" data-preview="Jane Doe (jane@acme.com)" /><span>Shopify Customer Name + Email <span class="preview-chip">→ "Jane Doe (jane@acme.com)"</span></span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Order number in StockBase</div>
+          <div class="radio-stack" data-group="order-num">
+            <label><input type="radio" name="order-num" data-prefix="" /><span>As is <span class="preview-chip" style="color:var(--muted); font-style:italic; margin-left:6px">→ "1043"</span></span></label>
+            <label>
+              <input type="radio" name="order-num" checked data-prefix="shopify-" />
+              <span>
+                Add prefix
+                <input type="text" class="text-input" id="prefixInput" value="shopify-" style="display:block; margin-left:0; margin-top:6px" />
+                <span class="sub" id="prefixPreview" style="margin-top:4px">Order will appear as: <strong>shopify-1043</strong></span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Status when imported</div>
+          <div class="radio-stack" data-group="import-as">
+            <label>
+              <input type="radio" name="import-as" checked data-status="match" />
+              <span>
+                Match Shopify status
+                <span class="sub">Pending orders come in as <strong>Open</strong>, fulfilled orders come in as <strong>Fulfilled</strong>.</span>
+              </span>
+            </label>
+            <label>
+              <input type="radio" name="import-as" data-status="fulfilled" />
+              <span>
+                Always Fulfilled
+                <span class="sub">Every Shopify order is auto-marked as fulfilled in StockBase.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Only bring in orders that are…</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="filter-status" checked /><span>Any status (paid or unpaid)</span></label>
+            <label><input type="radio" name="filter-status" /><span>Paid only</span></label>
+            <label><input type="radio" name="filter-status" /><span>Fulfilled only</span></label>
+          </div>
+          <div style="margin-top:12px; color:var(--muted); font-size:13px">
+            …and created after
+            <input type="text" class="text-input" value="Today" style="width:140px; display:inline-block; margin:0 0 0 6px" />
+            <span style="margin-left:6px">(historical orders won't be imported)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="recent-strip">
+        <h4>Recent imports</h4>
+        <div class="r-row"><span class="ico ok" style="color:var(--green)">✓</span><span class="r-id">shopify-1043</span><span>Jane Doe · €82.40</span><span class="r-meta">imported 14:01</span></div>
+        <div class="r-row"><span class="ico warn" style="color:#b07208">⚠</span><span class="r-id">shopify-1042</span><span>in conflicts</span><span class="r-meta">13:58</span></div>
+        <div class="r-row"><span class="ico ok" style="color:var(--green)">✓</span><span class="r-id">shopify-1039</span><span>A. Mendes · €54.00</span><span class="r-meta">11:22</span></div>
+        <div class="r-row"><span class="ico skip" style="color:var(--muted)">⊘</span><span class="r-id">shopify-1029</span><span>skipped by you</span><span class="r-meta">11:14</span></div>
+      </div>
+    </section>
+
+    <!-- Order Conflicts -->
+    <section class="panel" data-panel="conflicts">
+      <p class="tab-jtbd">Resolve orders that need a decision.</p>
+      <p class="panel-help">When an order can't be imported automatically, it shows up here. Fix it once, or skip it — the activity log keeps a 30-day record either way.</p>
+
+      <div class="conflict-section">
+        <h3 class="ch-title">Pending conflicts <span class="tab-badge" id="pendingBadge">3</span></h3>
+
+        <!-- Group: missing pricing scheme -->
+        <div class="conflict-group open" data-group-type="pricing">
+          <div class="cg-head" data-cg-toggle>
+            <span class="cg-chev">▶</span>
+            <span class="cg-title">Missing pricing scheme</span>
+            <span class="cg-count">1 order</span>
+            <button class="cg-bulkfix" data-cg-bulkfix>Fix all 1 with default rule</button>
+          </div>
+          <div class="cg-body">
+            <div class="conflict-card" data-conflict="1042">
+              <div class="cc-head"><span class="warn-ico">⚠</span> Order #1042 — pricing scheme "EU VAT" not found in StockBase</div>
+              <div class="cc-meta">Pulled 13:58 · Customer: Jane Doe · Total: €82.40</div>
+              <div class="cc-promise">Fix will: <strong>create pricing scheme "EU VAT @ 23%"</strong> in StockBase, then import this order.</div>
+              <div class="cc-actions">
+                <button class="btn btn-fix" data-fix>Create scheme &amp; import</button>
+                <button class="btn" data-skip title="Order won't be imported. You can re-try from the Activity log within 30 days.">Skip</button>
+                <button class="btn" data-view>Match to existing scheme ▾</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group: missing customer -->
+        <div class="conflict-group open" data-group-type="customer">
+          <div class="cg-head" data-cg-toggle>
+            <span class="cg-chev">▶</span>
+            <span class="cg-title">Missing customer</span>
+            <span class="cg-count">1 order</span>
+            <button class="cg-bulkfix" data-cg-bulkfix>Fix all 1 with default rule</button>
+          </div>
+          <div class="cg-body">
+            <div class="conflict-card" data-conflict="1041">
+              <div class="cc-head"><span class="warn-ico">⚠</span> Order #1041 — customer "M. Costa" not found in StockBase</div>
+              <div class="cc-meta">Pulled 13:58 · Customer: M. Costa · Total: €34.00</div>
+              <div class="cc-promise">Fix will: <strong>create customer "M. Costa"</strong> in StockBase (email m.costa@example.com), then import this order.</div>
+              <div class="cc-actions">
+                <button class="btn btn-fix" data-fix>Create customer &amp; import</button>
+                <button class="btn" data-skip title="Order won't be imported. You can re-try from the Activity log within 30 days.">Skip</button>
+                <button class="btn" data-view>Match to existing customer ▾</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group: missing taxing scheme -->
+        <div class="conflict-group open" data-group-type="taxing">
+          <div class="cg-head" data-cg-toggle>
+            <span class="cg-chev">▶</span>
+            <span class="cg-title">Missing taxing scheme</span>
+            <span class="cg-count">1 order</span>
+            <button class="cg-bulkfix" data-cg-bulkfix>Fix all 1 with default rule</button>
+          </div>
+          <div class="cg-body">
+            <div class="conflict-card" data-conflict="1040">
+              <div class="cc-head"><span class="warn-ico">⚠</span> Order #1040 — taxing scheme missing</div>
+              <div class="cc-meta">Pulled 13:58 · Customer: A. Silva · Total: €128.00</div>
+              <div class="cc-promise">Fix will: <strong>create taxing scheme</strong> from Shopify's tax data, then import this order.</div>
+              <div class="cc-actions">
+                <button class="btn btn-fix" data-fix>Create scheme &amp; import</button>
+                <button class="btn" data-skip title="Order won't be imported. You can re-try from the Activity log within 30 days.">Skip</button>
+                <button class="btn" data-view>Match to existing scheme ▾</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-conflicts" id="emptyConflicts" style="display:none">
+          <div class="check">✓</div>
+          <div><strong>No conflicts.</strong> All orders synced cleanly.</div>
+        </div>
+      </div>
+
+      <h3 class="ch-title" style="margin-top:28px">For future conflicts, do this without asking me:</h3>
+      <p class="ch-sub">These are your default rules. You'll only see a card above when something needs your input.</p>
+      <div class="card form-card">
+        <div class="group">
+          <div class="group-title">Can't find a matching taxing scheme</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="tax-conflict" checked /><span>Create the taxing scheme</span></label>
+            <label><input type="radio" name="tax-conflict" /><span>Add an adjustment line to the order</span></label>
+            <label><input type="radio" name="tax-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Can't find a matching pricing scheme</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="price-conflict" checked /><span>Create the pricing scheme</span></label>
+            <label><input type="radio" name="price-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Can't find a matching customer</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="cust-conflict" checked /><span>Create the customer</span></label>
+            <label><input type="radio" name="cust-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">If the imported order total doesn't match StockBase's calculations</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="total-conflict" checked /><span>Add an adjustment line to the order</span></label>
+            <label><input type="radio" name="total-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const order = ['locations','product','orders','conflicts'];
+
+  function show(id){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.panel === id));
+    const i = order.indexOf(id);
+    backBtn.style.display = i > 0 ? '' : 'none';
+    nextBtn.textContent = i === order.length - 1 ? 'Complete' : 'Next';
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  nextBtn.addEventListener('click', () => {
+    const i = order.indexOf(document.querySelector('.tab.active').dataset.tab);
+    if (i < order.length - 1) show(order[i+1]);
+    else alert('Setup complete!');
+  });
+  backBtn.addEventListener('click', () => {
+    const i = order.indexOf(document.querySelector('.tab.active').dataset.tab);
+    if (i > 0) show(order[i-1]);
+  });
+
+  // Connect/Disconnect toggle (visual only)
+  document.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.card');
+      const status = card.querySelector('.loc-status');
+      const isConnected = status.classList.toggle('connected');
+      status.innerHTML = isConnected
+        ? 'This location is <strong>connected.</strong>'
+        : 'This location is <strong>disconnected.</strong>';
+      btn.textContent = isConnected ? 'Disconnect' : 'Connect';
+      btn.classList.toggle('btn-primary', !isConnected);
+    });
+  });
+
+  // === Activity log expander ===
+  const activityToggle = document.getElementById('activityToggle');
+  const activityLog = document.getElementById('activityLog');
+  activityToggle.addEventListener('click', () => {
+    activityLog.classList.toggle('open');
+    activityToggle.classList.toggle('open');
+  });
+
+  // === Conflict-jump link in status strip ===
+  document.getElementById('conflictJump').addEventListener('click', () => show('conflicts'));
+
+  // === Push preflight (two-step) ===
+  const pushPreflight = document.getElementById('pushPreflight');
+  const previewPushBtn = document.getElementById('previewPushBtn');
+  const cancelPushBtn = document.getElementById('cancelPushBtn');
+  const confirmPushBtn = document.getElementById('confirmPushBtn');
+  previewPushBtn.addEventListener('click', () => {
+    pushPreflight.classList.add('open');
+    previewPushBtn.disabled = true;
+    previewPushBtn.style.opacity = '.5';
+  });
+  cancelPushBtn.addEventListener('click', () => {
+    pushPreflight.classList.remove('open');
+    previewPushBtn.disabled = false;
+    previewPushBtn.style.opacity = '';
+  });
+  confirmPushBtn.addEventListener('click', () => {
+    pushPreflight.classList.remove('open');
+    previewPushBtn.disabled = false;
+    previewPushBtn.style.opacity = '';
+    document.getElementById('pendingCount').textContent = '0';
+    previewPushBtn.textContent = 'No changes pending';
+    previewPushBtn.disabled = true;
+    previewPushBtn.style.opacity = '.5';
+    // Strip update
+    document.getElementById('stripStatus').innerHTML = 'Last sync <strong>just now</strong>';
+    prependActivity('ok', 'Sent 12 updates to Shopify');
+  });
+
+  // === Pull two-step activate ===
+  const pullCard = document.getElementById('pullCard');
+  const pullActivateBtn = document.getElementById('pullActivateBtn');
+  const pullPreflight = document.getElementById('pullPreflight');
+  const cancelPullBtn = document.getElementById('cancelPullBtn');
+  const confirmPullBtn = document.getElementById('confirmPullBtn');
+  const pullStatus = document.getElementById('pullStatus');
+  let pullActive = false;
+
+  pullActivateBtn.addEventListener('click', () => {
+    if (!pullActive) {
+      // Step 1: open preflight
+      pullPreflight.classList.add('open');
+      pullActivateBtn.style.display = 'none';
+    } else {
+      // Already on → turn off
+      pullActive = false;
+      pullStatus.classList.remove('connected');
+      pullStatus.innerHTML = 'This is <strong>turned off.</strong> Products and stock from Shopify are not coming in.';
+      pullActivateBtn.textContent = 'Turn on';
+      pullActivateBtn.classList.add('btn-primary');
+    }
+  });
+  cancelPullBtn.addEventListener('click', () => {
+    pullPreflight.classList.remove('open');
+    pullActivateBtn.style.display = '';
+  });
+  confirmPullBtn.addEventListener('click', () => {
+    pullPreflight.classList.remove('open');
+    pullActive = true;
+    pullStatus.classList.add('connected');
+    pullStatus.innerHTML = 'This is <strong>on.</strong> Last brought in just now · 47 products imported.';
+    pullActivateBtn.textContent = 'Turn off';
+    pullActivateBtn.classList.remove('btn-primary');
+    pullActivateBtn.style.display = '';
+    prependActivity('ok', 'Brought in 47 products from demo-store');
+  });
+
+  // === Conflict cards: Fix / Skip ===
+  let pendingConflicts = 3;
+  function updateConflictCount(){
+    const badge = document.getElementById('conflictBadge');
+    const pBadge = document.getElementById('pendingBadge');
+    badge.textContent = pendingConflicts;
+    pBadge.textContent = pendingConflicts;
+    badge.classList.toggle('zero', pendingConflicts === 0);
+    pBadge.classList.toggle('zero', pendingConflicts === 0);
+
+    // Strip warn link
+    const strip = document.getElementById('syncStrip');
+    const jump = document.getElementById('conflictJump');
+    if (pendingConflicts === 0) {
+      jump.innerHTML = '<strong>0</strong> conflicts';
+      strip.classList.remove('warn');
+    } else {
+      jump.innerHTML = '<strong>' + pendingConflicts + '</strong> conflict' + (pendingConflicts === 1 ? '' : 's') + ' need attention';
+      strip.classList.add('warn');
+    }
+
+    // Empty state
+    if (pendingConflicts === 0) {
+      document.getElementById('emptyConflicts').style.display = '';
+    }
+  }
+  // Initialize warn state on load
+  document.getElementById('syncStrip').classList.add('warn');
+
+  document.querySelectorAll('.conflict-card').forEach(card => {
+    const fix = card.querySelector('[data-fix]');
+    const skip = card.querySelector('[data-skip]');
+    const orderId = card.dataset.conflict;
+    fix.addEventListener('click', () => resolveConflict(card, 'fix', orderId));
+    skip.addEventListener('click', () => resolveConflict(card, 'skip', orderId));
+  });
+
+  function resolveConflict(card, mode, orderId){
+    if (card.classList.contains('resolved')) return;
+    card.classList.add('resolved');
+    const msg = mode === 'fix'
+      ? '✓ Fixed using the default rule. Order imported.'
+      : '⊘ Skipped. Order will not be imported.';
+    const div = document.createElement('div');
+    div.className = 'resolved-msg';
+    div.textContent = msg;
+    card.appendChild(div);
+    card.querySelector('.cc-actions').style.display = 'none';
+    pendingConflicts--;
+    updateConflictCount();
+    const logMsg = mode === 'fix'
+      ? 'Fixed order #' + orderId + ' (applied default rule)'
+      : 'Skipped order #' + orderId;
+    prependActivity(mode === 'fix' ? 'ok' : 'skip', logMsg);
+  }
+
+  // === Activity log helper ===
+  function prependActivity(kind, text){
+    const item = document.createElement('div');
+    item.className = 'item';
+    const ico = kind === 'ok' ? '✓' : kind === 'warn' ? '⚠' : '⊘';
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    item.innerHTML = '<span class="ico ' + kind + '">' + ico + '</span><span>' + text + '</span><span class="when">' + hh + ':' + mm + '</span>';
+    activityLog.insertBefore(item, activityLog.firstChild);
+  }
+
+  // === v3: Toast helper ===
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(text){
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // === v3: Match-health card → expand match list ===
+  const matchList = document.getElementById('matchList');
+  document.getElementById('reviewMatchesBtn').addEventListener('click', () => {
+    matchList.classList.toggle('open');
+  });
+  document.querySelectorAll('[data-match]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('.match-row');
+      row.classList.add('matched');
+      btn.textContent = '✓ Matched';
+      btn.disabled = true;
+      // update health card
+      const remaining = document.querySelectorAll('.match-row:not(.matched)').length;
+      const matched = 36 - remaining;
+      const card = document.getElementById('healthCard');
+      const line1 = card.querySelector('.h-line1');
+      const line2 = card.querySelector('.h-line2');
+      if (remaining === 0) {
+        card.classList.add('ok');
+        card.querySelector('.health-ico').textContent = '✓';
+        line1.innerHTML = '<strong>All 36 products</strong> matched between StockBase and Shopify.';
+        line2.textContent = 'Sync will work for your full catalogue.';
+      } else {
+        line1.innerHTML = '<strong>' + matched + ' of 36 products</strong> matched between StockBase and Shopify.';
+        line2.textContent = remaining + ' Shopify product' + (remaining === 1 ? '' : 's') + " don't have a StockBase match yet — they won't sync until matched.";
+      }
+      prependActivity('ok', 'Matched Shopify SKU ' + btn.dataset.match + ' to a StockBase product');
+      showToast('Matched. Will apply on the next sync.');
+    });
+  });
+
+  // === v3: Locations pairing ===
+  document.querySelectorAll('[data-pair-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pairToggle;
+      const card = document.getElementById('pair-' + key);
+      const isMatched = card.querySelector('.pair-arrow').classList.contains('connected');
+      if (isMatched) {
+        // Unmatch
+        card.querySelector('.pair-arrow').classList.remove('connected');
+        card.querySelector('.pair-arrow').textContent = '→';
+        const right = card.querySelectorAll('.pair-side')[1];
+        right.classList.add('empty');
+        right.querySelector('.pair-name').innerHTML = 'Pick a StockBase location';
+        right.querySelector('.pair-meta').textContent = 'Not matched yet';
+        btn.textContent = 'Match locations';
+        btn.classList.add('btn-primary');
+        showToast('Unmatched. Stock between these locations will no longer sync.');
+      } else {
+        // Open preflight
+        const pf = document.getElementById('pair-preflight-' + key);
+        if (pf) {
+          pf.classList.add('open');
+          btn.style.display = 'none';
+        }
+      }
+    });
+  });
+  document.querySelectorAll('[data-pair-cancel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pairCancel;
+      document.getElementById('pair-preflight-' + key).classList.remove('open');
+      document.querySelector('[data-pair-toggle="' + key + '"]').style.display = '';
+    });
+  });
+  document.querySelectorAll('[data-pair-confirm]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pairConfirm;
+      const card = document.getElementById('pair-' + key);
+      document.getElementById('pair-preflight-' + key).classList.remove('open');
+      const sug = document.getElementById('suggest-' + key);
+      if (sug) sug.style.display = 'none';
+      card.querySelector('.pair-arrow').classList.add('connected');
+      card.querySelector('.pair-arrow').textContent = '↔';
+      const right = card.querySelectorAll('.pair-side')[1];
+      right.classList.remove('empty');
+      right.querySelector('.pair-name').innerHTML = 'Toronto Warehouse <span class="pair-tag">in StockBase</span>';
+      right.querySelector('.pair-meta').textContent = 'Source of truth for stock';
+      const tBtn = document.querySelector('[data-pair-toggle="' + key + '"]');
+      tBtn.textContent = 'Unmatch';
+      tBtn.classList.remove('btn-primary');
+      tBtn.style.display = '';
+      showToast('Matched. Stock will start syncing on the next check.');
+      prependActivity('ok', 'Matched Toronto store (Shopify) ↔ Toronto Warehouse (StockBase)');
+    });
+  });
+  document.querySelectorAll('[data-pair-accept]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pairAccept;
+      // Open the preflight directly
+      document.getElementById('pair-preflight-' + key).classList.add('open');
+      document.querySelector('[data-pair-toggle="' + key + '"]').style.display = 'none';
+    });
+  });
+  document.querySelectorAll('[data-pair-dismiss]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pairDismiss;
+      document.getElementById('suggest-' + key).style.display = 'none';
+      showToast('Suggestion dismissed. Click "Match locations" to choose your own.');
+    });
+  });
+
+  // === v3: Test send ===
+  document.getElementById('testSendBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('Test sent: 1 product (SKU EYE-204) updated on Shopify ✓');
+    prependActivity('ok', 'Sent 1 test product (SKU EYE-204) to Shopify');
+  });
+
+  // === v3: Schedule selector ===
+  document.getElementById('scheduleSelect').addEventListener('change', (e) => {
+    const labels = {
+      instant: 'Updates will be sent right away when things change.',
+      hourly: 'Updates will be batched and sent every hour.',
+      manual: 'Auto-send is off. Use Preview before sending to send manually.'
+    };
+    showToast('Saved — ' + labels[e.target.value]);
+  });
+
+  // === v3: Orders tab live preview ===
+  const sampleCustomer = document.getElementById('sample-customer');
+  const sampleOrderNum = document.getElementById('sample-order-num');
+  const sampleStatus = document.getElementById('sample-status');
+  const prefixInput = document.getElementById('prefixInput');
+  const prefixPreview = document.getElementById('prefixPreview');
+
+  function updateSamplePreview(){
+    // Customer name
+    const custEl = document.querySelector('input[name="cust-name"]:checked');
+    if (custEl && custEl.dataset.preview) sampleCustomer.textContent = custEl.dataset.preview;
+    // Order number
+    const orderEl = document.querySelector('input[name="order-num"]:checked');
+    const prefix = orderEl ? (orderEl.dataset.prefix || '') : '';
+    sampleOrderNum.textContent = prefix + '1043';
+    prefixPreview.innerHTML = 'Order will appear as: <strong>' + (prefixInput.value || '') + '1043</strong>';
+    // Status
+    const statusEl = document.querySelector('input[name="import-as"]:checked');
+    if (statusEl) sampleStatus.textContent = statusEl.dataset.status === 'fulfilled' ? 'Fulfilled' : 'Open';
+    // Update visual checked-class on radio-stack labels for color
+    document.querySelectorAll('.radio-stack.with-preview label').forEach(l => {
+      l.classList.toggle('checked', l.querySelector('input').checked);
+    });
+  }
+  document.querySelectorAll('input[name="cust-name"], input[name="order-num"], input[name="import-as"]').forEach(r => {
+    r.addEventListener('change', () => { updateSamplePreview(); showToast('Saved — will apply to the next import.'); });
+  });
+  prefixInput.addEventListener('input', () => {
+    const orderEl = document.querySelector('input[name="order-num"]:checked');
+    if (orderEl && orderEl.dataset.prefix !== undefined) {
+      orderEl.dataset.prefix = prefixInput.value;
+    }
+    updateSamplePreview();
+  });
+  prefixInput.addEventListener('change', () => showToast('Saved — will apply to the next import.'));
+  updateSamplePreview();
+
+  // === v3: Conflict groups (collapse/expand + bulk fix) ===
+  document.querySelectorAll('[data-cg-toggle]').forEach(head => {
+    head.addEventListener('click', (e) => {
+      if (e.target.closest('[data-cg-bulkfix]')) return;
+      head.closest('.conflict-group').classList.toggle('open');
+    });
+  });
+  document.querySelectorAll('[data-cg-bulkfix]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const group = btn.closest('.conflict-group');
+      group.querySelectorAll('.conflict-card:not(.resolved)').forEach(card => {
+        const fix = card.querySelector('[data-fix]');
+        if (fix) fix.click();
+      });
+      btn.disabled = true;
+      btn.style.opacity = '.5';
+      btn.textContent = '✓ All fixed';
+    });
+  });
+
+  // === v3: settings change toasts on existing settings ===
+  document.querySelectorAll('input[name="notfound"], input[name="tax-conflict"], input[name="price-conflict"], input[name="cust-conflict"], input[name="total-conflict"], input[name="filter-status"], input[name="vancouver-mode"]').forEach(r => {
+    r.addEventListener('change', () => showToast('Saved — will apply to the next sync.'));
+  });
+  document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => showToast('Saved — will apply to the next sync.'));
+  });
+</script>
+<div id="toast"></div>
+</body>
+</html>

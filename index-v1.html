@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StockBase · Shopify Sync Settings</title>
+<style>
+  :root {
+    --green: #1f8755;
+    --green-dark: #186a43;
+    --green-light: #e8f5ee;
+    --text: #1a1a1a;
+    --muted: #5e6b73;
+    --border: #d8dde1;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --blue: #2563eb;
+    --danger: #d92d20;
+    --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .app { max-width: 1040px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px; }
+  .subtitle { color: var(--muted); max-width: 760px; margin: 0 0 28px; }
+  .subtitle a { color: #6c4ed8; font-weight: 500; }
+
+  /* Tabs row */
+  .tabs-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .tabs { display: flex; gap: 32px; }
+  .tab {
+    background: none;
+    border: none;
+    padding: 12px 0;
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+  .nav-buttons { display: flex; gap: 8px; padding-bottom: 8px; }
+
+  /* Buttons */
+  .btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background .12s, border-color .12s;
+  }
+  .btn:hover { background: #f7f8f9; }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  /* "Something changed — do something!" but it never says what. The blind nudge. */
+  .btn-flash {
+    border-color: var(--green);
+    animation: flash 1.3s ease-in-out infinite;
+  }
+  @keyframes flash {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(31,135,85,.0); border-color: var(--border); }
+    50%      { box-shadow: 0 0 0 4px rgba(31,135,85,.18); border-color: var(--green); }
+  }
+  /* The vague nudge: "something changed" — but never WHAT. This is the blind spot. */
+  .pending-note {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #9a6a00;
+    background: #fff7e6;
+    border: 1px solid #ffe2a8;
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+  .pending-note::first-letter { color: #f0a800; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .panel-help {
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+  }
+  .card-row + .card-body { border-top: 1px solid var(--border); padding: 18px 20px; background: #fcfcfd; }
+  .loc-name { font-weight: 600; }
+  .loc-status { color: var(--muted); margin-top: 2px; }
+  .loc-status strong { color: var(--text); font-weight: 600; }
+  .loc-status.connected strong { color: var(--green); }
+
+  /* Radio list */
+  .radio-group { display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
+  .radio-item { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .radio-item input { margin-top: 3px; accent-color: var(--blue); }
+  .radio-item .radio-content { flex: 1; }
+  .radio-item .radio-label { font-weight: 500; }
+  .field-label { display:block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  .select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .select:hover { border-color: #b9bfc4; }
+  .select .pin { color: var(--muted); }
+
+  /* Section header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 24px 0 10px;
+    color: var(--muted);
+  }
+  .section-header .icon {
+    width: 20px; height: 20px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--muted);
+  }
+  .section-header h3 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text); }
+  .help-dot {
+    width: 18px; height: 18px;
+    background: #d8dde1;
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    cursor: help;
+  }
+
+  /* Field rows */
+  .form-card { padding: 18px 20px; }
+  .form-row + .form-row { margin-top: 14px; }
+  .form-row label { display:block; font-weight: 500; margin-bottom: 6px; }
+
+  /* Checkboxes */
+  .checklist { display: flex; flex-direction: column; gap: 10px; }
+  .checklist label { display:flex; align-items:center; gap: 10px; cursor: pointer; }
+  .checklist input { accent-color: var(--blue); width: 16px; height: 16px; }
+
+  .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+  /* Shopify-bag icon */
+  .shop-bag {
+    width: 18px; height: 18px;
+    background: linear-gradient(180deg,#7ab55c,#5a8e3f);
+    border-radius: 3px;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .shop-bag::before {
+    content: "";
+    position: absolute;
+    inset: 3px 3px auto 3px;
+    height: 4px;
+    border: 1.5px solid #fff;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+  }
+
+  /* Empty placeholder for Orders tabs */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  /* Setup instructions banner */
+  .setup-banner {
+    display: flex;
+    gap: 12px;
+    background: #eaf3fb;
+    border: 1px solid #cfe2f3;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: #1f3a52;
+  }
+  .setup-banner ol { margin: 6px 0 0 18px; padding: 0; }
+  .setup-banner li { margin: 2px 0; }
+  .setup-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: #2b7cb8; color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-style: italic; font-weight: 700; font-family: Georgia, serif;
+    font-size: 14px;
+  }
+
+  /* Orders / conflicts grouped sections */
+  .group { margin-bottom: 18px; }
+  .group-title { font-weight: 600; margin-bottom: 8px; }
+  .text-input {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    width: 220px;
+    margin-top: 6px;
+    margin-left: 26px;
+  }
+  .radio-stack { display:flex; flex-direction:column; gap:8px; }
+  .radio-stack label { display:flex; align-items:flex-start; gap:8px; cursor:pointer; }
+  .radio-stack input { margin-top:3px; accent-color: var(--blue); }
+  .radio-stack .sub { display:block; color: var(--muted); font-size:13px; margin-left: 0; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="setup-banner">
+      <span class="setup-icon">i</span>
+      <div>
+        <div style="font-weight:600; margin-bottom:2px">Setup instructions</div>
+        <div>You're just a few minutes away from syncing StockBase with Shopify.</div>
+        <ol>
+          <li>Please start from the <strong>Locations</strong> tab and follow the written instructions.</li>
+          <li>Select <strong>Next</strong> as you complete each tab.</li>
+          <li>When you've finished the final tab, select <strong>Complete</strong> to finish setup.</li>
+        </ol>
+      </div>
+    </div>
+    <h1>Settings</h1>
+    <p class="subtitle">
+      Sync with Shopify by pushing and pulling select data. StockBase can push product details, stock levels, and shipping details and pull newly created products and sales from Shopify.
+      <a href="#">Learn More</a>
+    </p>
+
+    <div class="tabs-row">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="locations">Locations</button>
+        <button class="tab" data-tab="product">Product Sync</button>
+        <button class="tab" data-tab="orders">Orders</button>
+        <button class="tab" data-tab="conflicts">Order Conflicts</button>
+      </div>
+      <div class="nav-buttons">
+        <button class="btn" id="backBtn" style="display:none">Back</button>
+        <button class="btn btn-primary" id="nextBtn">Next</button>
+      </div>
+    </div>
+
+    <!-- Locations -->
+    <section class="panel active" data-panel="locations">
+      <p class="panel-help">Choose which StockBase location to use with each demo-store location when you sync products or pull orders.</p>
+
+      <!-- Vancouver Store: connected example with body open -->
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <div class="loc-name">Vancouver Store</div>
+            <div class="loc-status connected">This location is <strong>connected.</strong></div>
+          </div>
+          <button class="btn" data-toggle="vancouver">Disconnect</button>
+        </div>
+        <div class="card-body" data-body="vancouver">
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="vancouver-mode" checked />
+              <span class="radio-content">
+                <span class="radio-label">Connect to one location</span>
+                <span class="field-label">Location name</span>
+                <span class="select">
+                  <span class="pin">📍</span>
+                  <span>Default Location</span>
+                </span>
+              </span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="vancouver-mode" />
+              <span class="radio-content">
+                <span class="radio-label">Connect to all StockBase locations</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toronto: disconnected -->
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <div class="loc-name">Toronto store</div>
+            <div class="loc-status">This location is <strong>disconnected.</strong></div>
+          </div>
+          <button class="btn btn-primary" data-toggle="toronto">Connect</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Sync -->
+    <section class="panel" data-panel="product">
+      <div class="section-header">
+        <span class="icon">$⇄</span>
+        <h3>Pricing settings</h3>
+        <span class="help-dot" title="How Shopify pricing maps to StockBase">?</span>
+      </div>
+      <div class="card form-card">
+        <div class="form-row">
+          <label>Price</label>
+          <div class="select"><span class="shop-bag"></span><span>Normal Price</span></div>
+        </div>
+        <div class="form-row">
+          <label>Compare at price</label>
+          <div class="select"><span class="shop-bag"></span><span style="color:var(--muted)">Select pricing scheme</span></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <span class="icon">↑</span>
+        <h3>Push settings</h3>
+      </div>
+      <div class="card form-card">
+        <div style="font-weight:600; margin-bottom:4px">Push product changes made in StockBase to demo-store</div>
+        <div style="color:var(--muted); margin-bottom:14px">The details below will be pushed to Shopify only when they are changed in StockBase. StockBase will ignore any blank details.</div>
+        <div class="checklist">
+          <label><input type="checkbox" checked /> Quantity available</label>
+          <label><input type="checkbox" checked /> Images</label>
+          <label><input type="checkbox" checked /> Barcode</label>
+          <label><input type="checkbox" /> Weight <span class="help-dot">?</span></label>
+          <label><input type="checkbox" checked /> Price</label>
+          <label><input type="checkbox" checked /> Compare at price</label>
+          <label><input type="checkbox" checked /> Cost</label>
+        </div>
+        <div class="divider"></div>
+        <div style="font-weight:600; margin-bottom:8px">If product isn't found in Shopify</div>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="notfound" checked /><span class="radio-content"><span class="radio-label" style="font-weight:400">Let me know</span></span></label>
+          <label class="radio-item"><input type="radio" name="notfound" /><span class="radio-content"><span class="radio-label" style="font-weight:400">Don't let me know</span></span></label>
+        </div>
+        <div class="divider"></div>
+        <div class="card-row">
+          <div class="loc-status">Sends all enabled product details.</div>
+          <button class="btn btn-flash">↑ Push</button>
+        </div>
+        <div class="pending-note">● Changes detected — push to update Shopify.</div>
+      </div>
+
+      <div class="section-header">
+        <span class="icon">↓</span>
+        <h3>Pull settings</h3>
+      </div>
+      <div class="card">
+        <div class="card-row">
+          <div>
+            <div class="loc-name">Pull products into StockBase from demo-store</div>
+            <div class="loc-status">This setting is <strong>deactivated.</strong></div>
+          </div>
+          <button class="btn btn-flash" data-pull-toggle>↓ Pull</button>
+        </div>
+        <div class="pending-note">● Changes detected — pull to update StockBase.</div>
+        <div class="card-body" data-pull-body>
+          <span style="color:var(--muted)">This includes stock levels and product details</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orders -->
+    <section class="panel" data-panel="orders">
+      <p class="panel-help">Orders will be pulled into StockBase after they have been newly created or updated.</p>
+      <div class="card form-card">
+        <div class="group">
+          <div class="group-title">Set customer name from</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="cust-name" /><span>Shopify Company Name</span></label>
+            <label><input type="radio" name="cust-name" checked /><span>Shopify Customer Name</span></label>
+            <label><input type="radio" name="cust-name" /><span>Shopify Customer Email</span></label>
+            <label><input type="radio" name="cust-name" /><span>Shopify Customer Name + Email</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Import order numbers</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="order-num" /><span>As is</span></label>
+            <label>
+              <input type="radio" name="order-num" checked />
+              <span>
+                Add prefix
+                <input type="text" class="text-input" value="shopify-" style="display:block; margin-left:0; margin-top:6px" />
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Import orders into StockBase</div>
+          <div class="radio-stack">
+            <label>
+              <input type="radio" name="import-as" checked />
+              <span>
+                As is
+                <span class="sub">Pending orders pulled as open, fulfilled orders pulled as fulfilled.</span>
+              </span>
+            </label>
+            <label>
+              <input type="radio" name="import-as" />
+              <span>
+                As fulfilled
+                <span class="sub">Shopify orders auto-fulfilled when pulled into StockBase.</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Order Conflicts -->
+    <section class="panel" data-panel="conflicts">
+      <p class="panel-help">Choose how to resolve conflicts with orders pulled from fthyic-f6.</p>
+      <div class="card form-card">
+        <div class="group">
+          <div class="group-title">Can't find a matching taxing scheme</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="tax-conflict" checked /><span>Create the taxing scheme</span></label>
+            <label><input type="radio" name="tax-conflict" /><span>Add an adjustment line to the order</span></label>
+            <label><input type="radio" name="tax-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Can't find a matching pricing scheme</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="price-conflict" checked /><span>Create the pricing scheme</span></label>
+            <label><input type="radio" name="price-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">Can't find a matching customer</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="cust-conflict" checked /><span>Create the customer</span></label>
+            <label><input type="radio" name="cust-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="group">
+          <div class="group-title">If the imported order total doesn't match StockBase's calculations</div>
+          <div class="radio-stack">
+            <label><input type="radio" name="total-conflict" checked /><span>Add an adjustment line to the order</span></label>
+            <label><input type="radio" name="total-conflict" /><span>Stop importing the order and give an error</span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const order = ['locations','product','orders','conflicts'];
+
+  function show(id){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.panel === id));
+    const i = order.indexOf(id);
+    backBtn.style.display = i > 0 ? '' : 'none';
+    nextBtn.textContent = i === order.length - 1 ? 'Complete' : 'Next';
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+  nextBtn.addEventListener('click', () => {
+    const i = order.indexOf(document.querySelector('.tab.active').dataset.tab);
+    if (i < order.length - 1) show(order[i+1]);
+    else alert('Setup complete!');
+  });
+  backBtn.addEventListener('click', () => {
+    const i = order.indexOf(document.querySelector('.tab.active').dataset.tab);
+    if (i > 0) show(order[i-1]);
+  });
+
+  // Connect/Disconnect toggle (visual only)
+  document.querySelectorAll('[data-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.card');
+      const status = card.querySelector('.loc-status');
+      const isConnected = status.classList.toggle('connected');
+      status.innerHTML = isConnected
+        ? 'This location is <strong>connected.</strong>'
+        : 'This location is <strong>disconnected.</strong>';
+      btn.textContent = isConnected ? 'Disconnect' : 'Connect';
+      btn.classList.toggle('btn-primary', !isConnected);
+    });
+  });
+
+  // Pull settings activate toggle
+  document.querySelectorAll('[data-pull-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.card');
+      const status = card.querySelector('.loc-status');
+      const isActive = status.classList.toggle('connected');
+      status.innerHTML = isActive
+        ? 'This setting is <strong>activated.</strong>'
+        : 'This setting is <strong>deactivated.</strong>';
+      btn.textContent = isActive ? 'Deactivate' : 'Activate';
+      btn.classList.toggle('btn-primary', !isActive);
+    });
+  });
+</script>
+</body>
+</html>

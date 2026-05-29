@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sync Settings — Connect &amp; Integrations Concept</title>
+<style>
+  :root{
+    --green:#1f8755; --green-dark:#186a43; --text:#1a1a1a; --muted:#5e6b73;
+    --border:#d8dde1; --bg:#f4f5f7; --card:#fff; --blue:#2563eb;
+    --shadow:0 1px 3px rgba(16,24,40,.08); --shadow-lg:0 8px 28px rgba(16,24,40,.12);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:48px 24px 72px}
+  .hero{text-align:center;margin-bottom:8px}
+  .badge{display:inline-block;background:var(--green-light,#e8f5ee);color:var(--green-dark);
+    font-size:13px;font-weight:600;padding:5px 14px;border-radius:999px;border:1px solid #c9e7d6;margin-bottom:16px}
+  h1{font-size:30px;margin:0 0 10px}
+  .sub{color:var(--muted);font-size:17px;max-width:620px;margin:0 auto 8px}
+  .note{color:var(--muted);font-size:13px;margin-top:14px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:40px 0}
+  @media(max-width:680px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;
+    box-shadow:var(--shadow);transition:.18s;text-decoration:none;color:inherit;display:flex;flex-direction:column}
+  .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--green)}
+  .ver{font-size:13px;font-weight:700;color:var(--green-dark);letter-spacing:.5px}
+  .card h2{font-size:20px;margin:8px 0 6px}
+  .card p{color:var(--muted);font-size:14px;margin:0 0 16px;flex:1}
+  .feats{list-style:none;padding:0;margin:0 0 18px}
+  .feats li{font-size:13px;color:var(--text);padding:4px 0 4px 22px;position:relative}
+  .feats li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+  .open{display:inline-block;background:var(--green);color:#fff;font-weight:600;font-size:14px;
+    padding:9px 18px;border-radius:9px;text-align:center}
+  .open.alt{background:#fff;color:var(--green-dark);border:1px solid var(--green)}
+  .concepts{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px 28px;box-shadow:var(--shadow)}
+  .concepts h3{margin:0 0 16px;font-size:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .concept{padding-left:14px;border-left:3px solid var(--green)}
+  .concept b{display:block;font-size:14px;margin-bottom:2px}
+  .concept span{font-size:13px;color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <span class="badge">Product / UX Prototype · Connect &amp; Integrations</span>
+    <h1>Sync Settings Concept</h1>
+    <p class="sub">
+      A high-fidelity prototype exploring how an inventory product and Shopify
+      stay in sync — with explicit source-of-truth, directional control,
+      conflict resolution, and recovery policy.
+    </p>
+    <p class="note">Fictional product ("StockBase") and sample data. Built as a product-thinking exercise.</p>
+  </div>
+
+  <div class="cards">
+    <a class="card" href="index-v1.html">
+      <span class="ver">VERSION 1</span>
+      <h2>Foundation</h2>
+      <p>The first cut: connect, match locations, and Push / Pull data between the
+        two systems. The flows worked — but the buttons were <em>blind</em>.</p>
+      <ul class="feats">
+        <li>Guided setup &amp; location matching</li>
+        <li>Push / Pull buttons (directional sync)</li>
+        <li>Pricing scheme mapping</li>
+        <li>Basic order-conflict list</li>
+      </ul>
+      <span class="open alt">Open v1 →</span>
+    </a>
+
+    <a class="card" href="index-v3.html">
+      <span class="ver">VERSION 3</span>
+      <h2>Trust &amp; Recovery</h2>
+      <p>Same Push / Pull — but now <em>safe to press</em>. You see what a sync will
+        do before you commit, and can recover when something goes sideways.</p>
+      <ul class="feats">
+        <li>Change preview ("would update 14 products")</li>
+        <li>"Send one as a test" before bulk</li>
+        <li>Conflict policy — resolve future conflicts automatically</li>
+        <li>Activity log &amp; last-sync visibility</li>
+      </ul>
+      <span class="open">Open v3 →</span>
+    </a>
+  </div>
+
+  <div style="background:#faf5ff;border:1px solid #e4d4f7;border-radius:14px;padding:20px 24px;margin:24px 0">
+    <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#7c3aed;margin-bottom:6px;font-weight:700">The insight that drove v3</div>
+    <p style="margin:0;font-size:16px;color:#1a1a1a;line-height:1.65">
+      In v1, the Push / Pull buttons <b>worked</b> — but users hesitated to click them.
+      They didn't know <b>what</b> a sync would change or whether it could be undone, so a
+      working feature went unused. That's not a reliability problem; it's a <b>trust</b>
+      problem. v3 answers the question the user was actually asking — <em>"what happens if
+      I press this?"</em> — with preview, a test-one option, and visible history.
+    </p>
+  </div>
+
+  <div class="concepts">
+    <h3>Integration concepts this prototype demonstrates</h3>
+    <div class="grid">
+      <div class="concept"><b>Source of truth</b><span>Per-object, not binary — e.g. which side owns stock for a matched location.</span></div>
+      <div class="concept"><b>Directional sync</b><span>Send-to vs bring-in are separate, explicit decisions — not one toggle.</span></div>
+      <div class="concept"><b>Freshness</b><span>Real-time on change vs an hourly sweep — stated to the user, not hidden.</span></div>
+      <div class="concept"><b>Change preview</b><span>Show the blast radius ("12 updates") before committing a sync.</span></div>
+      <div class="concept"><b>Conflict resolution</b><span>Missing customer / pricing / taxing scheme — each with a clear next action.</span></div>
+      <div class="concept"><b>Recovery policy</b><span>"For future conflicts, do this without asking me" — create, adjust, or stop &amp; error.</span></div>
+      <div class="concept"><b>Safe vs human-review</b><span>Some mismatches auto-resolve; some require a person. The UI encodes that.</span></div>
+      <div class="concept"><b>Visibility</b><span>Last sync, recent imports, and per-item status build operator trust.</span></div>
+    </div>
+  </div>
+
+  <footer>
+    Self-contained HTML/CSS — no build step. Open either file directly in a browser.
+  </footer>
+
+</div>
+</body>
+</html>
